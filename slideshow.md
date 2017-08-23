@@ -52,8 +52,7 @@ Talk to me after the presentation, or email me at:
 
 > thomas at adjoint dot io
 
-Nanocoin
---------
+# Nanocoin
 
 # Motivation 
 
@@ -107,14 +106,8 @@ Nanocoin
 
 * Transfer Transactions
 
-# Presentation Goals
 
-A simple yet broad introduction into the components of Distributed Ledger
-Technology (DLT).
-
-
-Cryptography
-------------
+# Cryptography
 
 . . .
 
@@ -138,8 +131,8 @@ Cryptography
 
 # Hash Functions
 
-A **hash function** is a total function for which each input there is a unique
-output. To be used in cryptography, it must have these properties:
+A **hash function** is a total function for which each input there is a unique,
+fixed length output. To be used in safely in cryptography, it must have these properties:
 
 Pre-image Resistance
 
@@ -163,10 +156,13 @@ $Hash(m1) = Hash(m2)$.
 * produce output that can be thought of as a digital fingerprint of the input data. 
 * the most minor changes in the input data result in dramatically different outputs.
 
+**SHA3_256** is one of the most commonly used strong hashing algorithm, producing a fixed
+256 bits of output. 
+
 Example:
 ```haskell
 ghci> import Data.ByteString
-ghci> import Crypto.Hash (hashWith)
+ghci> import Crypto.Hash (hashWith, SHA3_256)
 ghci> hashWith SHA3_256 ("1234" :: ByteString)
 1d6442ddcfd9db1ff81df77cbefcd5afcc8c7ca952ab3101ede17a84b866d3f3
 ghci> hashWith SHA3_256 ("12345" :: ByteString)
@@ -174,6 +170,63 @@ ghci> hashWith SHA3_256 ("12345" :: ByteString)
 ```
 
 *Hashes are usually displayed in base16 format for brevity*
+
+# Hash Functions - Merkle Trees
+
+A **Merkle Tree** is a binary tree of hashed data, constructed from the leaves up in which sibling
+nodes are hashed together to create the parent nodes.
+
+<img src="img/merkle-tree-visualization.png" alt="Drawing" class="center-img" style="width: 700px"> 
+
+* Merkle Root changes if the hash of a single leaf changes
+* Leaves are usually network transactions
+* Merkle Proofs are powerful
+
+# Hash Functions - Merkle Trees (cont)
+
+Implementation:
+
+```haskell
+{- https://github.com/adjoint-io/merkle-tree -}
+
+newtype MerkleRoot = MerkleRoot
+  { getMerkleRoot :: ByteString
+  } 
+
+data MerkleTree 
+  = MerkleEmpty
+  | MerkleTree MerkleNode
+
+data MerkleNode a
+  = MerkleBranch {
+      mRoot  :: MerkleRoot
+    , mLeft  :: MerkleNode
+    , mRight :: MerkleNode
+  }
+  | MerkleLeaf {
+      mRoot :: MerkleRoot
+    , mVal  :: ByteString
+  }
+```
+
+# Hash Functions - Merkle Tree Proofs
+
+A **Merkle Tree Proof** can be constructed to prove to another party that a
+piece of data is part of a merkle tree, given the merkle root of the tree and
+the piece of data to prove *inclusion* of. 
+
+- Can construct in $O(2^{\log(n)})$ where $n$ is the number of leaf nodes,
+without fancy data structures.
+
+- Can verify in $O(\log(n))$, as the constructed proof contains $\log(n)$
+  elements. 
+
+The proof is a list of hashes, starting with the hash of the element in
+question, followed by it's sibling, then their parent and it's sibling, etc.
+
+Not all nodes need to store the full tree as they can query other nodes about
+transaction inclusion in blocks by supplying the transaction hash and the merkle
+root of the block.
 
 # Finite Fields
 
@@ -184,27 +237,189 @@ $$
   \mathbb{F}_p = \mathbb{Z} / p \mathbb{Z} \\
   \forall x, y\in\mathbb{F}_p, \ (x + y)\in\mathbb{F}_p \\
   \forall x, y\in\mathbb{F}_p, \ (x * y)\in\mathbb{F}_p \\
-  \exists g \in\mathbb{F}_p, \ \{ \sum_{i=0}^{p} g \} \, \equiv \, \mathbb{F}_p \\
+  \exists g \in\mathbb{F}_p, \ \{ g^{i} \mid \forall i \in\{0,1,..,p-2\}\} \equiv \mathbb{F}_p \\
 $$
-
-For *prime finite fields*, every element is a generator point, $g$.
 
 ## Example
 
 $$
-  \mathbb{F}_p = \{0, 1, 2\} \\
-  1 + 1 = 2 \quad 2 + 1 = 0 \\
-  2 * 1 = 2 \quad 2 * 2 = 1 
+  \mathbb{F}_7 = \{0, 1, 2, 3, 4, 5, 6\} \\
+  g = 3 \\
+  1 + 5 = 6 \quad 2 + 6 = 1 \\
+  4 * 1 = 4 \quad 3 * 4 = 5
 $$
 
 # ECC (Elliptic Curve Cryptography)
 
+The general form of an **elliptic curve** is the equation: 
+
+$$ y^{2} = x^{3} + ax + b $$
+
+where
+$$(x,y)\in\mathbb{F}_p$$
+
+which we write as:
+$$E(\mathbb{F}_p) $$
+
+Stating that the curve's domain is defined by $(x,y)$ values in the finite field $\mathbb{F}_p$
+
+<img src="img/ECC.png" alt="Drawing" class="center-img" style="width: 700px"> 
+
 # ECC - Elliptic Curves
+
+An **Elliptic Curve** over a finite field is defined by a 6 tuple:
+$$(p,a,b,G,n,h)$$ 
+
+where
+
+```
+p = large prime 
+a = curve polynomial coefficient
+b = curve polynomial coefficient
+G = generator base point
+n = order                        
+h = cofactor                      
+```
+
+But wait, they actually look like this!
+
+<img src="img/finite-field-ec.png" alt="Drawing" class="center-img" style="width: 400px"> 
+
+For $E(\mathbb{F}_p)$, _all_ points except the point at *inifinity* are
+generator points. 
+
+# ECC - Elliptic Curves - Secp256k1
+
+We are interested in *Koblitz* curves, which are a special kind of elliptic
+curves where $a = 0$.
+
+**Secp256k1** is a 256 bit *Koblitz* curve over the field $\mathbb{F}_p$ where
+$p$ is the prime:
+
+$$ p\ =\ 2^{256}−2^{32}−2^{9}−2^{8}-2^{7}−2^{6}−2^{4}−1 $$
+
+and the curve coefficients 
+
+$$
+  a = 0 \\
+  b = 7 
+$$
+
+such that
+
+$$ y^{2} = x^{3} + 7 \\ $$
+
+With generator point $g$ defined as:
+```
+G_x = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+G_y = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
+```
 
 # ECC - Public/Private Key Pairs
 
+. . .
+
+Points in $E(\mathbb{F}_p)$ can be multiplied by a scalar $k\in\mathbb{F}_p$
+
+. . .
+
+*... naturally, because multiplication is repeated addition.*
+
+. . .
+
+A *Private Key* in ECC is defined by a random scalar $k\in\mathbb{F}_p$
+
+. . .
+
+A *Public Key* in ECC is defined by a point $Q = kG$ where $G$ is the generator
+point.
+
+. . .
+
+## ECDLP 
+
+. . .
+
+The *Discrete Log Problem* for ECC states that it is computationally infeasable
+to find $k$ given $Q = kG$ in $E(\mathbb{F}_p)$
+
+. . .
+
+This is how private keys stay private!
+
+
 # ECC - ECDSA
 
+The **Elliptic Curve Digital Signature Algorithm** is actually a pair of
+algorithms used to *sign* and *verify* a piece of data using ECC.
+
+. . .
+
+**Sign**
+
+: To *sign* a piece of data is to combine an ECC private key and the hashed data
+to produce a pair of integers (from which the private key cannot be derived). 
+
+**Verify**
+
+: To *verify* a signed piece of data is to mathematically prove, using the
+*public key* of the signer, that the signature was produced using the data and
+private key.
+
+# ECC - Signature Algorithm
+
+Inputs for the signing function are:
+
+- The data as a string of bytes, $msg$.
+- The elliptic curve private-key, $d$.
+
+The **signing** algorithm will be described in terms of the curve Secp256k1, where
+$p$ is the secp256k1 prime, and $G$ is it’s respective generator point:
+
+1. Hash the document byte stream such that $z = Hash(msg)$
+2. Generate a random value $k \in \{1,..,p−1\}$
+3. Compute $(x,y) = kG$
+4. Compute $r = x \mod p$, if $r = 0$, go back to step 1
+5. Compute $s = (z + rd) / k$ , if $s = 0$, go back to step 1
+
+The resulting $(r, s)$ pair is the signature.
+
+# ECC - Signature Verification Algorithm
+
+Inputs to the verification algorithm are:
+
+- The data as a string of bytes, $msg$
+- The signature $(r,s)$
+- The EC public key $Q$
+
+The output of the verification algorithm is a boolean indicating whether or not
+the data was signed with the *private key* corresponding to the *public key*:
+
+1. Compute $z = Hash(msg)$
+2. Compute $t = (z \mod p) / s$
+3. Compute $u = (r \mod p) / s$
+4. Let $(x,y) = tG + uQ$
+5. Verify that $r = x \mod p$
+
+# ECC - ECDSA Example
+
+An example using the `cryptonite` library in Haskell:
+
+```haskell
+ghci> import Crypto.Number.Hash (SHA3_256)
+ghci> import Crypto.PubKey.ECC.ECDSA (sign, verify)
+ghci> import Crypto.PubKey.ECC.Generate (generate)
+ghci> import Crypto.PubKey.ECC.Types (getCurveByName, SEC_p256k1)
+```
+
+```haskell
+ghci> let msg = "hello world" :: ByteString
+ghci> let secp256k1 = getCurveByName SEC_p256k1
+ghci> (pubKey, privKey) <- generate secp256k1
+ghci> sig <- sign privKey SHA3_256 msg
+ghci> verify SHA3_256 pubKey sig msg
+True 
+```
 
 # Blockchain
 
@@ -503,7 +718,7 @@ hashBlockHeader (BlockHeader origin previousHash txs nonce) =
 A **Blockchain** is constructed by forcing every block to contain a hash of the
 previous block's header in its header. 
 
-<img src="img/bitcoin-block-chain-verified.png" alt="Drawing" class="center-img" style="width: 700px"> 
+<img src="img/blockchain-merkle.png" alt="Drawing" class="center-img" style="width: 700px"> 
 
 *Note*: In the classic *Proof of Work* consensus algorithm, the `nonce` field of the
 block header is incremented until the hash of the block header has a certain
@@ -522,9 +737,10 @@ The validity of a block is determined by several predicates:
 1) `currentBlockIndex == previousBlockIndex + 1`
 2) `hashBlock previousBlock == previousHash currentBlock`
 3) `proofOfWorkPredicate (hashBlock currentBlock)`
-4) `length (transactions currentBlock) > 0`
-5) `verify originKey signature (encode currentBlockHeader)`
-6) `validateTransactions (transactions block)`
+4) `merkleRoot block == (mtHash $ mkMerkleTree $ hashTxs $ transactions block)`
+5) `length (transactions currentBlock) > 0`
+6) `verify originKey signature (encode currentBlockHeader)`
+7) `validateTransactions (transactions block)`
 
 # Blocks - Validation (cont)
 
@@ -541,14 +757,19 @@ validateBlock ledger prevBlock block
   | index block /= index prevBlock + 1 = Left $ InvalidBlockIndex (index block)
   | hashBlock prevBlock /= previousHash (header block) = Left InvalidPrevBlockHash
   | not (checkProofOfWork block) = Left InvalidBlockHash
+  | mRoot /= mRoot' = Left InvalidBlockMerkleRoot
   | null (transactions $ header block) = Left InvalidBlockNumTxs
   | otherwise = do
       -- Verify signature of block
       verifyBlockSignature block
       -- Validate all transactions w/ respect to world state
       first InvalidBlockTx $ do
-        let txs = transactions $ header block
-        T.validateTransactions ledger txs
+        T.validateTransactions ledger 
+  where
+    blockTxs = transactions block
+    txHashes = map T.hashTransactions blockTxs
+    mRoot'   = mtHash $ mkMerkleRoot txHashes
+    mRoot    = merkleRoot block
 ```
 
 # Ledger
@@ -564,7 +785,7 @@ application of all transactions in all blocks. In Nanocoin, this manifests in a
 mapping of addresses (derived from ECC public keys) to the addresses balance.
 
 
-# Ledger 
+# Ledger (cont)
 
 Definition and operations on the `Ledger` datatype:
 
@@ -590,6 +811,7 @@ addAddress :: Address -> Ledger -> Ledger
 
 -- | Transfer Nanocoin from one account to another
 transfer :: Ledger -> Address -> Address -> Balance -> Either TransferError Ledger
+```
 
 # Ledger - Apply Transaction
 
@@ -644,8 +866,6 @@ applyTransaction ledger tx@(Transaction hdr sig) = do
     Right ledger' -> pure ledger'
 ```
 
-```
-
 # Ledger - Apply Block
 
 To **apply** a block to the ledger means to apply every transaction in the block
@@ -665,8 +885,13 @@ applyBlock ledger = applyTransactions ledger . transactions . header
 In Nanocoin's implementation, `applyBlock` is also used in the definitions for
 `validateBlock`. A block is only valid if all it's transactions are valid. 
 
-Networking
-----------
+# Networking
+
+* NodeState
+
+* P2P Messaging Protocol
+
+* Consensus
 
 # Node 
 
@@ -801,32 +1026,42 @@ often flooded with messages.
 # P2P Messaging - Protocol (cont)
 
 On `QueryBlockMsg n`:
-1) Query the current block chain state
-2) If the block with index `n` exists,
-   i. then respond with a `BlockMsg blockAtIndexN`
-   ii. else dont respond
+
+1. Query the current block chain state
+2. If the block with index `n` exists,
+    i. then respond with a `BlockMsg blockAtIndexN`
+    ii. else dont respond
 
 On `BlockMsg block`:
-1) Query the latest block in the chain
-2) Attempt to apply the new `block` to the ledger state
-3) If applying the block succeeded
-   i. then respond with a `QueryBlockMsg (index block + 1)`
-   ii. else do nothing
+
+1. Query the latest block in the chain
+2. Attempt to apply the new `block` to the ledger state
+3. If applying the block succeeded
+    i. then respond with a `QueryBlockMsg (index block + 1)`
+    ii. else do nothing
 
 On `TransactionMsg tx`:
-1) Query the current ledger state
-2) If the transaction is valid
-   i. then add it to the mempool
-   ii. else do nothing
+
+1. Query the current ledger state
+2. If the transaction is valid
+    i. then add it to the mempool
+    ii. else do nothing
 
 # Consensus
 
 **Consensus** is how nodes in the network agree on what blocks are valid or not. 
 
-Sometimes these consensus algorithms can be quite complex and warrant the 
-implementation of an entire protocol to ensure consensus is reached. 
+. . .
 
-In Nanocoin, classic **Proof of Work** consensus is used, and acheived by
+* Can be complex (PoS, PoA)
+
+* Sometimes warrants new protocols
+
+* *Eventually Consistent* or *Byzantine Fault Tolerant*
+
+. . .
+
+In Nanocoin, classic **Proof of Work** consensus is used, and acheived by simply
 adding a final predicate to block validation. 
 
 # Consensus - Proof of Work
@@ -836,7 +1071,7 @@ block, determining how "hard" the node will have to work to mine the block.
 
 For Nanocoin, the difficulty is decided by the block index:
 
-$$ difficulty(index) = round(ln(index)) $$.
+$$ difficulty(index) = round(ln(index)) $$
 
 The difficulty calculated determines how many zeros must prefix the resulting
 sha256 hash of the contents of the block header.
@@ -896,9 +1131,6 @@ checkProofOfWork block =
     difficulty = calcDifficulty $ index block
     prefix = toS $ replicate difficulty '0'
 ```
-
-Joining the Network
--------------------
 
 # Running a Node
 
@@ -967,10 +1199,9 @@ Simply visit `localhost:XXXX/<cmd-or-query>` in your browser to interact with th
   have, the transaction will be rejected during the block mining process and
   purged from all nodes' mempools.
 
-Conclusion 
------------
+# Conclusion 
 
-# Key Points
+## Key Points
 
 . . .
 
@@ -986,21 +1217,29 @@ Conclusion
 
 . . .
 
-- 
+## Future Work
 
-# Future Work
+. . .
 
 - Merkle Trees
 
+. . .
+
 - CLI
+
+. . .
 
 - Testing
 
+. . .
+
 - Database
 
-- Multicast to `cloud-haskell`
-  + Giant refactor
-  + New Messaging Protocol
+. . .
 
-The End
--------
+- Multicast to `cloud-haskell`
+
+. . .
+
+
+# The End

@@ -121,8 +121,10 @@ Thomas Dietert
 <blockquote>
 <p>thomas at adjoint dot io</p>
 </blockquote>
-<h2 id="nanocoin">Nanocoin</h2>
 </div>
+</div>
+<div id="nanocoin" class="slide section level1">
+<h1>Nanocoin</h1>
 </div>
 <div id="motivation" class="slide section level1">
 <h1>Motivation</h1>
@@ -190,10 +192,8 @@ Thomas Dietert
 </ul>
 </div>
 </div>
-<div id="presentation-goals" class="slide section level1">
-<h1>Presentation Goals</h1>
-<p>A simple yet broad introduction into the components of Distributed Ledger Technology (DLT).</p>
-<h2 id="cryptography">Cryptography</h2>
+<div id="cryptography" class="slide section level1">
+<h1>Cryptography</h1>
 <div class="incremental">
 <ul>
 <li>Hashing</li>
@@ -222,7 +222,7 @@ Thomas Dietert
 </div>
 <div id="hash-functions" class="slide section level1">
 <h1>Hash Functions</h1>
-<p>A <strong>hash function</strong> is a total function for which each input there is a unique output. To be used in cryptography, it must have these properties:</p>
+<p>A <strong>hash function</strong> is a total function for which each input there is a unique, fixed length output. To be used in safely in cryptography, it must have these properties:</p>
 <dl>
 <dt>Pre-image Resistance</dt>
 <dd><p>Given a hash value <span class="math inline">\(h\)</span> it should be difficult to find any message <span class="math inline">\(m\)</span> such that <span class="math inline">\(h = Hash(m)\)</span>.</p>
@@ -231,12 +231,70 @@ Thomas Dietert
 <dd><p>Given an input <span class="math inline">\(m1\)</span> it should be difficult to find different input <span class="math inline">\(m2\)</span> such that <span class="math inline">\(Hash(m1) = Hash(m2)\)</span>.</p>
 </dd>
 <dt><strong>Collision Resistance</strong></dt>
-<dd><p>It should be difficult to find two different messages <span class="math inline">\(m1\)</span> and <span class="math inline">\(m2\)</span> such that $Hash(m1) = Hash(m2).</p>
+<dd><p>It should be difficult to find two different messages <span class="math inline">\(m1\)</span> and <span class="math inline">\(m2\)</span> such that <span class="math inline">\(Hash(m1) = Hash(m2)\)</span>.</p>
 </dd>
 </dl>
 </div>
 <div id="hash-functions---sha3_256" class="slide section level1">
 <h1>Hash Functions - SHA3_256</h1>
+<p><em>Strong</em> hash functions</p>
+<ul>
+<li>produce output that can be thought of as a digital fingerprint of the input data.</li>
+<li>the most minor changes in the input data result in dramatically different outputs.</li>
+</ul>
+<p><strong>SHA3_256</strong> is one of the most commonly used strong hashing algorithm, producing a fixed 256 bits of output.</p>
+<p>Example:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">import </span><span class="dt">Data.ByteString</span>
+ghci<span class="fu">&gt;</span> <span class="kw">import </span><span class="dt">Crypto.Hash</span> (hashWith, <span class="dt">SHA3_256</span>)
+ghci<span class="fu">&gt;</span> hashWith <span class="dt">SHA3_256</span> (<span class="st">&quot;1234&quot;</span><span class="ot"> ::</span> <span class="dt">ByteString</span>)
+1d6442ddcfd9db1ff81df77cbefcd5afcc8c7ca952ab3101ede17a84b866d3f3
+ghci<span class="fu">&gt;</span> hashWith <span class="dt">SHA3_256</span> (<span class="st">&quot;12345&quot;</span><span class="ot"> ::</span> <span class="dt">ByteString</span>)
+7d4e3eec80026719639ed4dba68916eb94c7a49a053e05c8f9578fe4e5a3d7ea</code></pre></div>
+<p><em>Hashes are usually displayed in base16 format for brevity</em></p>
+</div>
+<div id="hash-functions---merkle-trees" class="slide section level1">
+<h1>Hash Functions - Merkle Trees</h1>
+<p>A <strong>Merkle Tree</strong> is a binary tree of hashed data, constructed from the leaves up in which sibling nodes are hashed together to create the parent nodes.</p>
+<p><img src="img/merkle-tree-visualization.png" alt="Drawing" class="center-img" style="width: 700px"></p>
+<ul>
+<li>Merkle Root changes if the hash of a single leaf changes</li>
+<li>Leaves are usually network transactions</li>
+<li>Merkle Proofs are powerful</li>
+</ul>
+</div>
+<div id="hash-functions---merkle-trees-cont" class="slide section level1">
+<h1>Hash Functions - Merkle Trees (cont)</h1>
+<p>Implementation:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- https://github.com/adjoint-io/merkle-tree -}</span>
+
+<span class="kw">newtype</span> <span class="dt">MerkleRoot</span> <span class="fu">=</span> <span class="dt">MerkleRoot</span>
+  {<span class="ot"> getMerkleRoot ::</span> <span class="dt">ByteString</span>
+  } 
+
+<span class="kw">data</span> <span class="dt">MerkleTree</span> 
+  <span class="fu">=</span> <span class="dt">MerkleEmpty</span>
+  <span class="fu">|</span> <span class="dt">MerkleTree</span> <span class="dt">MerkleNode</span>
+
+<span class="kw">data</span> <span class="dt">MerkleNode</span> a
+  <span class="fu">=</span> <span class="dt">MerkleBranch</span> {
+<span class="ot">      mRoot  ::</span> <span class="dt">MerkleRoot</span>
+    ,<span class="ot"> mLeft  ::</span> <span class="dt">MerkleNode</span>
+    ,<span class="ot"> mRight ::</span> <span class="dt">MerkleNode</span>
+  }
+  <span class="fu">|</span> <span class="dt">MerkleLeaf</span> {
+<span class="ot">      mRoot ::</span> <span class="dt">MerkleRoot</span>
+    ,<span class="ot"> mVal  ::</span> <span class="dt">ByteString</span>
+  }</code></pre></div>
+</div>
+<div id="hash-functions---merkle-tree-proofs" class="slide section level1">
+<h1>Hash Functions - Merkle Tree Proofs</h1>
+<p>A <strong>Merkle Tree Proof</strong> can be constructed to prove to another party that a piece of data is part of a merkle tree, given the merkle root of the tree and the piece of data to prove <em>inclusion</em> of.</p>
+<ul>
+<li><p>Can construct in <span class="math inline">\(O(2^{\log(n)})\)</span> where <span class="math inline">\(n\)</span> is the number of leaf nodes, without fancy data structures.</p></li>
+<li><p>Can verify in <span class="math inline">\(O(\log(n))\)</span>, as the constructed proof contains <span class="math inline">\(\log(n)\)</span> elements.</p></li>
+</ul>
+<p>The proof is a list of hashes, starting with the hash of the element in question, followed by it's sibling, then their parent and it's sibling, etc.</p>
+<p>Not all nodes need to store the full tree as they can query other nodes about transaction inclusion in blocks by supplying the transaction hash and the merkle root of the block.</p>
 </div>
 <div id="finite-fields" class="slide section level1">
 <h1>Finite Fields</h1>
@@ -246,27 +304,140 @@ Thomas Dietert
   \mathbb{F}_p = \mathbb{Z} / p \mathbb{Z} \\
   \forall x, y\in\mathbb{F}_p, \ (x + y)\in\mathbb{F}_p \\
   \forall x, y\in\mathbb{F}_p, \ (x * y)\in\mathbb{F}_p \\
-  \exists g \in\mathbb{F}_p, \ \{ \sum_{i=0}^{p} g \} \, \equiv \, \mathbb{F}_p \\
+  \exists g \in\mathbb{F}_p, \ \{ g^{i} \mid \forall i \in\{0,1,..,p-2\}\} \equiv \mathbb{F}_p \\
 \]</span></p>
-<p>For <em>prime finite fields</em>, every element is a generator point, <span class="math inline">\(g\)</span>.</p>
 <h2 id="example">Example</h2>
 <p><span class="math display">\[
-  \mathbb{F}_p = \{0, 1, 2\} \\
-  1 + 1 = 2 \quad 2 + 1 = 0 \\
-  2 * 1 = 2 \quad 2 * 2 = 1 
+  \mathbb{F}_7 = \{0, 1, 2, 3, 4, 5, 6\} \\
+  g = 3 \\
+  1 + 5 = 6 \quad 2 + 6 = 1 \\
+  4 * 1 = 4 \quad 3 * 4 = 5
 \]</span></p>
 </div>
 <div id="ecc-elliptic-curve-cryptography" class="slide section level1">
 <h1>ECC (Elliptic Curve Cryptography)</h1>
+<p>The general form of an <strong>elliptic curve</strong> is the equation:</p>
+<p><span class="math display">\[ y^{2} = x^{3} + ax + b \]</span></p>
+<p>where <span class="math display">\[(x,y)\in\mathbb{F}_p\]</span></p>
+<p>which we write as: <span class="math display">\[E(\mathbb{F}_p) \]</span></p>
+<p>Stating that the curve's domain is defined by <span class="math inline">\((x,y)\)</span> values in the finite field <span class="math inline">\(\mathbb{F}_p\)</span></p>
+<p><img src="img/ECC.png" alt="Drawing" class="center-img" style="width: 700px"></p>
 </div>
 <div id="ecc---elliptic-curves" class="slide section level1">
 <h1>ECC - Elliptic Curves</h1>
+<p>An <strong>Elliptic Curve</strong> over a finite field is defined by a 6 tuple: <span class="math display">\[(p,a,b,G,n,h)\]</span></p>
+<p>where</p>
+<pre><code>p = large prime 
+a = curve polynomial coefficient
+b = curve polynomial coefficient
+G = generator base point
+n = order                        
+h = cofactor                      </code></pre>
+<p>But wait, they actually look like this!</p>
+<p><img src="img/finite-field-ec.png" alt="Drawing" class="center-img" style="width: 400px"></p>
+<p>For <span class="math inline">\(E(\mathbb{F}_p)\)</span>, <em>all</em> points except the point at <em>inifinity</em> are generator points.</p>
+</div>
+<div id="ecc---elliptic-curves---secp256k1" class="slide section level1">
+<h1>ECC - Elliptic Curves - Secp256k1</h1>
+<p>We are interested in <em>Koblitz</em> curves, which are a special kind of elliptic curves where <span class="math inline">\(a = 0\)</span>.</p>
+<p><strong>Secp256k1</strong> is a 256 bit <em>Koblitz</em> curve over the field <span class="math inline">\(\mathbb{F}_p\)</span> where <span class="math inline">\(p\)</span> is the prime:</p>
+<p><span class="math display">\[ p\ =\ 2^{256}−2^{32}−2^{9}−2^{8}-2^{7}−2^{6}−2^{4}−1 \]</span></p>
+<p>and the curve coefficients</p>
+<p><span class="math display">\[
+  a = 0 \\
+  b = 7 
+\]</span></p>
+<p>such that</p>
+<p><span class="math display">\[ y^{2} = x^{3} + 7 \\ \]</span></p>
+<p>With generator point <span class="math inline">\(g\)</span> defined as:</p>
+<pre><code>G_x = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+G_y = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8</code></pre>
 </div>
 <div id="ecc---publicprivate-key-pairs" class="slide section level1">
 <h1>ECC - Public/Private Key Pairs</h1>
+<div class="incremental">
+<p>Points in <span class="math inline">\(E(\mathbb{F}_p)\)</span> can be multiplied by a scalar <span class="math inline">\(k\in\mathbb{F}_p\)</span></p>
+</div>
+<div class="incremental">
+<p><em>... naturally, because multiplication is repeated addition.</em></p>
+</div>
+<div class="incremental">
+<p>A <em>Private Key</em> in ECC is defined by a random scalar <span class="math inline">\(k\in\mathbb{F}_p\)</span></p>
+</div>
+<div class="incremental">
+<p>A <em>Public Key</em> in ECC is defined by a point <span class="math inline">\(Q = kG\)</span> where <span class="math inline">\(G\)</span> is the generator point.</p>
+</div>
+<div class="incremental">
+<h2 id="ecdlp">ECDLP</h2>
+<div class="incremental">
+<p>The <em>Discrete Log Problem</em> for ECC states that it is computationally infeasable to find <span class="math inline">\(k\)</span> given <span class="math inline">\(Q = kG\)</span> in <span class="math inline">\(E(\mathbb{F}_p)\)</span></p>
+</div>
+<div class="incremental">
+<p>This is how private keys stay private!</p>
+</div>
+</div>
 </div>
 <div id="ecc---ecdsa" class="slide section level1">
 <h1>ECC - ECDSA</h1>
+<p>The <strong>Elliptic Curve Digital Signature Algorithm</strong> is actually a pair of algorithms used to <em>sign</em> and <em>verify</em> a piece of data using ECC.</p>
+<div class="incremental">
+<dl>
+<dt><strong>Sign</strong></dt>
+<dd><p>To <em>sign</em> a piece of data is to combine an ECC private key and the hashed data to produce a pair of integers (from which the private key cannot be derived).</p>
+</dd>
+<dt><strong>Verify</strong></dt>
+<dd><p>To <em>verify</em> a signed piece of data is to mathematically prove, using the <em>public key</em> of the signer, that the signature was produced using the data and private key.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div id="ecc---signature-algorithm" class="slide section level1">
+<h1>ECC - Signature Algorithm</h1>
+<p>Inputs for the signing function are:</p>
+<ul>
+<li>The data as a string of bytes, <span class="math inline">\(msg\)</span>.</li>
+<li>The elliptic curve private-key, <span class="math inline">\(d\)</span>.</li>
+</ul>
+<p>The <strong>signing</strong> algorithm will be described in terms of the curve Secp256k1, where <span class="math inline">\(p\)</span> is the secp256k1 prime, and <span class="math inline">\(G\)</span> is it’s respective generator point:</p>
+<ol style="list-style-type: decimal">
+<li>Hash the document byte stream such that <span class="math inline">\(z = Hash(msg)\)</span></li>
+<li>Generate a random value <span class="math inline">\(k \in \{1,..,p−1\}\)</span></li>
+<li>Compute <span class="math inline">\((x,y) = kG\)</span></li>
+<li>Compute <span class="math inline">\(r = x \mod p\)</span>, if <span class="math inline">\(r = 0\)</span>, go back to step 1</li>
+<li>Compute <span class="math inline">\(s = (z + rd) / k\)</span> , if <span class="math inline">\(s = 0\)</span>, go back to step 1</li>
+</ol>
+<p>The resulting <span class="math inline">\((r, s)\)</span> pair is the signature.</p>
+</div>
+<div id="ecc---signature-verification-algorithm" class="slide section level1">
+<h1>ECC - Signature Verification Algorithm</h1>
+<p>Inputs to the verification algorithm are:</p>
+<ul>
+<li>The data as a string of bytes, <span class="math inline">\(msg\)</span></li>
+<li>The signature <span class="math inline">\((r,s)\)</span></li>
+<li>The EC public key <span class="math inline">\(Q\)</span></li>
+</ul>
+<p>The output of the verification algorithm is a boolean indicating whether or not the data was signed with the <em>private key</em> corresponding to the <em>public key</em>:</p>
+<ol style="list-style-type: decimal">
+<li>Compute <span class="math inline">\(z = Hash(msg)\)</span></li>
+<li>Compute <span class="math inline">\(t = (z \mod p) / s\)</span></li>
+<li>Compute <span class="math inline">\(u = (r \mod p) / s\)</span></li>
+<li>Let <span class="math inline">\((x,y) = tG + uQ\)</span></li>
+<li>Verify that <span class="math inline">\(r = x \mod p\)</span></li>
+</ol>
+</div>
+<div id="ecc---ecdsa-example" class="slide section level1">
+<h1>ECC - ECDSA Example</h1>
+<p>An example using the <code>cryptonite</code> library in Haskell:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">import </span><span class="dt">Crypto.Number.Hash</span> (<span class="dt">SHA3_256</span>)
+ghci<span class="fu">&gt;</span> <span class="kw">import </span><span class="dt">Crypto.PubKey.ECC.ECDSA</span> (sign, verify)
+ghci<span class="fu">&gt;</span> <span class="kw">import </span><span class="dt">Crypto.PubKey.ECC.Generate</span> (generate)
+ghci<span class="fu">&gt;</span> <span class="kw">import </span><span class="dt">Crypto.PubKey.ECC.Types</span> (getCurveByName, <span class="dt">SEC_p256k1</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">let</span> msg <span class="fu">=</span> <span class="st">&quot;hello world&quot;</span><span class="ot"> ::</span> <span class="dt">ByteString</span>
+ghci<span class="fu">&gt;</span> <span class="kw">let</span> secp256k1 <span class="fu">=</span> getCurveByName <span class="dt">SEC_p256k1</span>
+ghci<span class="fu">&gt;</span> (pubKey, privKey) <span class="ot">&lt;-</span> generate secp256k1
+ghci<span class="fu">&gt;</span> sig <span class="ot">&lt;-</span> sign privKey <span class="dt">SHA3_256</span> msg
+ghci<span class="fu">&gt;</span> verify <span class="dt">SHA3_256</span> pubKey sig msg
+<span class="dt">True</span> </code></pre></div>
 </div>
 <div id="blockchain" class="slide section level1">
 <h1>Blockchain</h1>
@@ -512,7 +683,7 @@ hashBlockHeader (<span class="dt">BlockHeader</span> origin previousHash txs non
 <div id="blocks---blockchain" class="slide section level1">
 <h1>Blocks - Blockchain</h1>
 <p>A <strong>Blockchain</strong> is constructed by forcing every block to contain a hash of the previous block's header in its header.</p>
-<p><img src="img/bitcoin-block-chain-verified.png" alt="Drawing" class="center-img" style="width: 700px"></p>
+<p><img src="img/blockchain-merkle.png" alt="Drawing" class="center-img" style="width: 700px"></p>
 <p><em>Note</em>: In the classic <em>Proof of Work</em> consensus algorithm, the <code>nonce</code> field of the block header is incremented until the hash of the block header has a certain prefix.</p>
 </div>
 <div id="blocks---validation" class="slide section level1">
@@ -528,6 +699,7 @@ hashBlockHeader (<span class="dt">BlockHeader</span> origin previousHash txs non
 <li><code>currentBlockIndex == previousBlockIndex + 1</code></li>
 <li><code>hashBlock previousBlock == previousHash currentBlock</code></li>
 <li><code>proofOfWorkPredicate (hashBlock currentBlock)</code></li>
+<li><code>merkleRoot block == (mtHash $ mkMerkleTree $ hashTxs $ transactions block)</code></li>
 <li><code>length (transactions currentBlock) &gt; 0</code></li>
 <li><code>verify originKey signature (encode currentBlockHeader)</code></li>
 <li><code>validateTransactions (transactions block)</code></li>
@@ -545,14 +717,19 @@ validateBlock ledger prevBlock block
   <span class="fu">|</span> index block <span class="fu">/=</span> index prevBlock <span class="fu">+</span> <span class="dv">1</span> <span class="fu">=</span> <span class="dt">Left</span> <span class="fu">$</span> <span class="dt">InvalidBlockIndex</span> (index block)
   <span class="fu">|</span> hashBlock prevBlock <span class="fu">/=</span> previousHash (header block) <span class="fu">=</span> <span class="dt">Left</span> <span class="dt">InvalidPrevBlockHash</span>
   <span class="fu">|</span> not (checkProofOfWork block) <span class="fu">=</span> <span class="dt">Left</span> <span class="dt">InvalidBlockHash</span>
+  <span class="fu">|</span> mRoot <span class="fu">/=</span> mRoot&#39; <span class="fu">=</span> <span class="dt">Left</span> <span class="dt">InvalidBlockMerkleRoot</span>
   <span class="fu">|</span> null (transactions <span class="fu">$</span> header block) <span class="fu">=</span> <span class="dt">Left</span> <span class="dt">InvalidBlockNumTxs</span>
   <span class="fu">|</span> otherwise <span class="fu">=</span> <span class="kw">do</span>
       <span class="co">-- Verify signature of block</span>
       verifyBlockSignature block
       <span class="co">-- Validate all transactions w/ respect to world state</span>
       first <span class="dt">InvalidBlockTx</span> <span class="fu">$</span> <span class="kw">do</span>
-        <span class="kw">let</span> txs <span class="fu">=</span> transactions <span class="fu">$</span> header block
-        T.validateTransactions ledger txs</code></pre></div>
+        T.validateTransactions ledger 
+  <span class="kw">where</span>
+    blockTxs <span class="fu">=</span> transactions block
+    txHashes <span class="fu">=</span> map T.hashTransactions blockTxs
+    mRoot&#39;   <span class="fu">=</span> mtHash <span class="fu">$</span> mkMerkleRoot txHashes
+    mRoot    <span class="fu">=</span> merkleRoot block</code></pre></div>
 </div>
 <div id="ledger" class="slide section level1">
 <h1>Ledger</h1>
@@ -564,16 +741,30 @@ validateBlock ledger prevBlock block
 </ul>
 <p>Therefore, the <code>Ledger</code> is the state resulting from the ordered, sequential application of all transactions in all blocks. In Nanocoin, this manifests in a mapping of addresses (derived from ECC public keys) to the addresses balance.</p>
 </div>
-<div id="ledger-1" class="slide section level1">
-<h1>Ledger</h1>
+<div id="ledger-cont" class="slide section level1">
+<h1>Ledger (cont)</h1>
 <p>Definition and operations on the <code>Ledger</code> datatype:</p>
-<p>```haskell {- src/Nanocoin/Ledger.hs -}</p>
-<p>type Balance = Int</p>
-<p>-- | Datatype storing the holdings of addresses newtype Ledger = Ledger { unLedger :: Map Address Balance }</p>
-<p>-- Lookup the balance of an Address. This operation returns -- Nothing if the address has never transacted on the network. lookupBalance :: Address -&gt; Ledger -&gt; Maybe Balance</p>
-<p>-- | Add an integer to an account's existing balance addBalance :: Address -&gt; Balance -&gt; Ledger -&gt; Ledger</p>
-<p>-- | Add an address with 1000 balance to the Ledger addAddress :: Address -&gt; Ledger -&gt; Ledger</p>
-<p>-- | Transfer Nanocoin from one account to another transfer :: Ledger -&gt; Address -&gt; Address -&gt; Balance -&gt; Either TransferError Ledger</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Ledger.hs -}</span>
+
+<span class="kw">type</span> <span class="dt">Balance</span> <span class="fu">=</span> <span class="dt">Int</span>
+
+<span class="co">-- | Datatype storing the holdings of addresses</span>
+<span class="kw">newtype</span> <span class="dt">Ledger</span> <span class="fu">=</span> <span class="dt">Ledger</span>
+  {<span class="ot"> unLedger ::</span> <span class="dt">Map</span> <span class="dt">Address</span> <span class="dt">Balance</span> 
+  } 
+
+<span class="co">-- Lookup the balance of an Address. This operation returns</span>
+<span class="co">-- Nothing if the address has never transacted on the network.</span>
+<span class="ot">lookupBalance ::</span> <span class="dt">Address</span> <span class="ot">-&gt;</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Balance</span>
+
+<span class="co">-- | Add an integer to an account&#39;s existing balance</span>
+<span class="ot">addBalance ::</span> <span class="dt">Address</span> <span class="ot">-&gt;</span> <span class="dt">Balance</span> <span class="ot">-&gt;</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Ledger</span>
+
+<span class="co">-- | Add an address with 1000 balance to the Ledger</span>
+<span class="ot">addAddress ::</span> <span class="dt">Address</span> <span class="ot">-&gt;</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Ledger</span>
+
+<span class="co">-- | Transfer Nanocoin from one account to another</span>
+<span class="ot">transfer ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Address</span> <span class="ot">-&gt;</span> <span class="dt">Address</span> <span class="ot">-&gt;</span> <span class="dt">Balance</span> <span class="ot">-&gt;</span> <span class="dt">Either</span> <span class="dt">TransferError</span> <span class="dt">Ledger</span></code></pre></div>
 </div>
 <div id="ledger---apply-transaction" class="slide section level1">
 <h1>Ledger - Apply Transaction</h1>
@@ -616,7 +807,6 @@ applyTransaction ledger tx<span class="fu">@</span>(<span class="dt">Transaction
       throwError <span class="fu">$</span> <span class="dt">InvalidTx</span> tx <span class="fu">$</span> <span class="dt">InvalidTransfer</span> err
       pure ledger
     <span class="dt">Right</span> ledger&#39; <span class="ot">-&gt;</span> pure ledger&#39;</code></pre></div>
-<p>```</p>
 </div>
 <div id="ledger---apply-block" class="slide section level1">
 <h1>Ledger - Apply Block</h1>
@@ -628,7 +818,14 @@ applyTransaction ledger tx<span class="fu">@</span>(<span class="dt">Transaction
 <span class="ot">applyBlock ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Block</span> <span class="ot">-&gt;</span> (<span class="dt">Ledger</span>, [<span class="dt">InvalidTx</span>])
 applyBlock ledger <span class="fu">=</span> applyTransactions ledger <span class="fu">.</span> transactions <span class="fu">.</span> header</code></pre></div>
 <p>In Nanocoin's implementation, <code>applyBlock</code> is also used in the definitions for <code>validateBlock</code>. A block is only valid if all it's transactions are valid.</p>
-<h2 id="networking">Networking</h2>
+</div>
+<div id="networking" class="slide section level1">
+<h1>Networking</h1>
+<ul>
+<li><p>NodeState</p></li>
+<li><p>P2P Messaging Protocol</p></li>
+<li><p>Consensus</p></li>
+</ul>
 </div>
 <div id="node" class="slide section level1">
 <h1>Node</h1>
@@ -731,21 +928,54 @@ removeTransactions txs (<span class="dt">MemPool</span> pool) <span class="fu">=
 </div>
 <div id="p2p-messaging---protocol-cont" class="slide section level1">
 <h1>P2P Messaging - Protocol (cont)</h1>
-<p>On <code>QueryBlockMsg n</code>: 1) Query the current block chain state 2) If the block with index <code>n</code> exists, i. then respond with a <code>BlockMsg blockAtIndexN</code> ii. else dont respond</p>
-<p>On <code>BlockMsg block</code>: 1) Query the latest block in the chain 2) Attempt to apply the new <code>block</code> to the ledger state 3) If applying the block succeeded i. then respond with a <code>QueryBlockMsg (index block + 1)</code> ii. else do nothing</p>
-<p>On <code>TransactionMsg tx</code>: 1) Query the current ledger state 2) If the transaction is valid i. then add it to the mempool ii. else do nothing</p>
+<p>On <code>QueryBlockMsg n</code>:</p>
+<ol style="list-style-type: decimal">
+<li>Query the current block chain state</li>
+<li>If the block with index <code>n</code> exists,
+<ol style="list-style-type: lower-roman">
+<li>then respond with a <code>BlockMsg blockAtIndexN</code></li>
+<li>else dont respond</li>
+</ol></li>
+</ol>
+<p>On <code>BlockMsg block</code>:</p>
+<ol style="list-style-type: decimal">
+<li>Query the latest block in the chain</li>
+<li>Attempt to apply the new <code>block</code> to the ledger state</li>
+<li>If applying the block succeeded
+<ol style="list-style-type: lower-roman">
+<li>then respond with a <code>QueryBlockMsg (index block + 1)</code></li>
+<li>else do nothing</li>
+</ol></li>
+</ol>
+<p>On <code>TransactionMsg tx</code>:</p>
+<ol style="list-style-type: decimal">
+<li>Query the current ledger state</li>
+<li>If the transaction is valid
+<ol style="list-style-type: lower-roman">
+<li>then add it to the mempool</li>
+<li>else do nothing</li>
+</ol></li>
+</ol>
 </div>
 <div id="consensus" class="slide section level1">
 <h1>Consensus</h1>
 <p><strong>Consensus</strong> is how nodes in the network agree on what blocks are valid or not.</p>
-<p>Sometimes these consensus algorithms can be quite complex and warrant the implementation of an entire protocol to ensure consensus is reached.</p>
-<p>In Nanocoin, classic <strong>Proof of Work</strong> consensus is used, and acheived by adding a final predicate to block validation.</p>
+<div class="incremental">
+<ul>
+<li><p>Can be complex (PoS, PoA)</p></li>
+<li><p>Sometimes warrants new protocols</p></li>
+<li><p><em>Eventually Consistent</em> or <em>Byzantine Fault Tolerant</em></p></li>
+</ul>
+</div>
+<div class="incremental">
+<p>In Nanocoin, classic <strong>Proof of Work</strong> consensus is used, and acheived by simply adding a final predicate to block validation.</p>
+</div>
 </div>
 <div id="consensus---proof-of-work" class="slide section level1">
 <h1>Consensus - Proof of Work</h1>
 <p>In classic PoW, there is a notion of <strong>difficulty</strong> when it comes to mining a block, determining how &quot;hard&quot; the node will have to work to mine the block.</p>
 <p>For Nanocoin, the difficulty is decided by the block index:</p>
-<p><span class="math display">\[ difficulty(index) = round(ln(index)) \]</span>.</p>
+<p><span class="math display">\[ difficulty(index) = round(ln(index)) \]</span></p>
 <p>The difficulty calculated determines how many zeros must prefix the resulting sha256 hash of the contents of the block header.</p>
 <h2 id="algorithm">Algorithm:</h2>
 <ol style="list-style-type: decimal">
@@ -797,7 +1027,6 @@ checkProofOfWork block <span class="fu">=</span>
   <span class="kw">where</span>
     difficulty <span class="fu">=</span> calcDifficulty <span class="fu">$</span> index block
     prefix <span class="fu">=</span> toS <span class="fu">$</span> replicate difficulty <span class="ch">&#39;0&#39;</span></code></pre></div>
-<h2 id="joining-the-network">Joining the Network</h2>
 </div>
 <div id="running-a-node" class="slide section level1">
 <h1>Running a Node</h1>
@@ -844,10 +1073,10 @@ $ <span class="ex">nanocoin</span></code></pre></div>
 <dd><p>Issues a <code>Transfer</code> transaction to the network, transferring the specified <code>amount</code> of Nanocoin from this node's account to another node's account designated by <code>toAddress</code>. If you try to transfer more Nanocoin than you have, the transaction will be rejected during the block mining process and purged from all nodes' mempools.</p>
 </dd>
 </dl>
-<h2 id="conclusion">Conclusion</h2>
 </div>
-<div id="key-points" class="slide section level1">
-<h1>Key Points</h1>
+<div id="conclusion" class="slide section level1">
+<h1>Conclusion</h1>
+<h2 id="key-points">Key Points</h2>
 <div class="incremental">
 <ul>
 <li>Cryptography is cool!</li>
@@ -863,24 +1092,35 @@ $ <span class="ex">nanocoin</span></code></pre></div>
 <li>Cryptocurrencies are complex pieces of software made of simple components.</li>
 </ul>
 </div>
+<h2 id="future-work">Future Work</h2>
 <div class="incremental">
 <ul>
-<li></li>
+<li>Merkle Trees</li>
 </ul>
 </div>
-</div>
-<div id="future-work" class="slide section level1">
-<h1>Future Work</h1>
+<div class="incremental">
 <ul>
-<li><p>Merkle Trees</p></li>
-<li><p>CLI</p></li>
-<li><p>Testing</p></li>
-<li><p>Database</p></li>
-<li>Multicast to <code>cloud-haskell</code></li>
-<li>Giant refactor</li>
-<li><p>New Messaging Protocol</p></li>
+<li>CLI</li>
 </ul>
-<h2 id="the-end">The End</h2>
+</div>
+<div class="incremental">
+<ul>
+<li>Testing</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Database</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Multicast to <code>cloud-haskell</code></li>
+</ul>
+</div>
+</div>
+<div id="the-end" class="slide section level1">
+<h1>The End</h1>
 </div>
 </body>
 </html>
