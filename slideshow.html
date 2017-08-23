@@ -1,0 +1,886 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Thomas Dietert" />
+  <meta name="date" content="2017-08-23" />
+  <title>Nanocoin - Cryptocurrencies with Haskell</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="-s" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="style.css" />
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Nanocoin - Cryptocurrencies with Haskell</h1>
+  <p class="author">
+Thomas Dietert
+  </p>
+  <p class="date">August 23, 2017</p>
+</div>
+<div class="slide section level1">
+
+<h2 id="introduction">Introduction</h2>
+</div>
+<div id="about-me" class="slide section level1">
+<h1>About me</h1>
+<div class="incremental">
+<ul>
+<li>Haskell programming for 2.5 years</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Software Engineer at Adjoint</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>I think cryptocurrencies are cool!</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>I like to go Bouldering</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>I'm always listening to music on Soundcloud</li>
+</ul>
+</div>
+</div>
+<div id="adjoint" class="slide section level1">
+<h1>Adjoint</h1>
+<p>We are implementing a <em>private</em>, asset agnostic distributed ledger and smart contract platform.</p>
+<div class="incremental">
+<ul>
+<li>Cryptography</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Distributed Systems</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Programming Languages Theory</li>
+</ul>
+</div>
+<div class="incremental">
+<h2 id="were-hiring">Were Hiring</h2>
+<p>Talk to me after the presentation, or email me at:</p>
+<blockquote>
+<p>thomas at adjoint dot io</p>
+</blockquote>
+<h2 id="nanocoin">Nanocoin</h2>
+</div>
+</div>
+<div id="motivation" class="slide section level1">
+<h1>Motivation</h1>
+<div class="incremental">
+<ul>
+<li>Cryptocurrencies are <em>so</em> hot right now</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Haskell lets you write software that doesn't break</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Cryptography is cool</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Blockchain is simple</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Distributed systems protocols should be simple</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Cryptocurrencies are easy-ish to implement</li>
+</ul>
+</div>
+</div>
+<div id="project-goals" class="slide section level1">
+<h1>Project Goals</h1>
+<div class="incremental">
+<ul>
+<li>Well-documented.</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Low-dependencies.</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Using classic PoW Consensus.</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Simple P2P Protocol using UDP chatter.</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>ECDSA signed &amp; verifed Blocks &amp; Transactions</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Transfer Transactions</li>
+</ul>
+</div>
+</div>
+<div id="presentation-goals" class="slide section level1">
+<h1>Presentation Goals</h1>
+<p>A simple yet broad introduction into the components of Distributed Ledger Technology (DLT).</p>
+<h2 id="cryptography">Cryptography</h2>
+<div class="incremental">
+<ul>
+<li>Hashing</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Finite Fields</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Elliptic Curves</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Public/Private Key Pairs</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>ECDSA</li>
+</ul>
+</div>
+</div>
+<div id="hash-functions" class="slide section level1">
+<h1>Hash Functions</h1>
+<p>A <strong>hash function</strong> is a total function for which each input there is a unique output. To be used in cryptography, it must have these properties:</p>
+<dl>
+<dt>Pre-image Resistance</dt>
+<dd><p>Given a hash value <span class="math inline">\(h\)</span> it should be difficult to find any message <span class="math inline">\(m\)</span> such that <span class="math inline">\(h = Hash(m)\)</span>.</p>
+</dd>
+<dt>Second Pre-image Resistance</dt>
+<dd><p>Given an input <span class="math inline">\(m1\)</span> it should be difficult to find different input <span class="math inline">\(m2\)</span> such that <span class="math inline">\(Hash(m1) = Hash(m2)\)</span>.</p>
+</dd>
+<dt><strong>Collision Resistance</strong></dt>
+<dd><p>It should be difficult to find two different messages <span class="math inline">\(m1\)</span> and <span class="math inline">\(m2\)</span> such that $Hash(m1) = Hash(m2).</p>
+</dd>
+</dl>
+</div>
+<div id="hash-functions---sha3_256" class="slide section level1">
+<h1>Hash Functions - SHA3_256</h1>
+</div>
+<div id="finite-fields" class="slide section level1">
+<h1>Finite Fields</h1>
+<h2 id="definition-incomplete">Definition (incomplete)</h2>
+<p><span class="math display">\[
+  \mathbb{Z} = \{..., -1, 0, 1, ...\} \\
+  \mathbb{F}_p = \mathbb{Z} / p \mathbb{Z} \\
+  \forall x, y\in\mathbb{F}_p, \ (x + y)\in\mathbb{F}_p \\
+  \forall x, y\in\mathbb{F}_p, \ (x * y)\in\mathbb{F}_p \\
+  \exists g \in\mathbb{F}_p, \ \{ \sum_{i=0}^{p} g \} \, \equiv \, \mathbb{F}_p \\
+\]</span></p>
+<p>For <em>prime finite fields</em>, every element is a generator point, <span class="math inline">\(g\)</span>.</p>
+<h2 id="example">Example</h2>
+<p><span class="math display">\[
+  \mathbb{F}_p = \{0, 1, 2\} \\
+  1 + 1 = 2 \quad 2 + 1 = 0 \\
+  2 * 1 = 2 \quad 2 * 2 = 1 
+\]</span></p>
+</div>
+<div id="ecc-elliptic-curve-cryptography" class="slide section level1">
+<h1>ECC (Elliptic Curve Cryptography)</h1>
+</div>
+<div id="ecc---elliptic-curves" class="slide section level1">
+<h1>ECC - Elliptic Curves</h1>
+</div>
+<div id="ecc---publicprivate-key-pairs" class="slide section level1">
+<h1>ECC - Public/Private Key Pairs</h1>
+</div>
+<div id="ecc---ecdsa" class="slide section level1">
+<h1>ECC - ECDSA</h1>
+</div>
+<div id="blockchain" class="slide section level1">
+<h1>Blockchain</h1>
+<p>A <strong>blockchain</strong> is a replicated state machine maintaining an cryptographically verifiable immutable history of transactions.</p>
+<div class="incremental">
+<ul>
+<li>Addresses</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Transactions</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Blocks</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Ledger (Distributed)</li>
+</ul>
+</div>
+</div>
+<div id="blockchain-definitions" class="slide section level1">
+<h1>Blockchain Definitions</h1>
+<dl>
+<dt><strong>Address</strong></dt>
+<dd><p>A unique, base58 encoded value representing a public key of a node in the network.</p>
+</dd>
+<dt><strong>Ledger</strong></dt>
+<dd><p>A mapping of <em>addresses</em> to balances. All nodes start off with 1000 Nanocoin, and do not</p>
+</dd>
+<dt><strong>Transaction</strong></dt>
+<dd><p>A data structure representing a single atomic modification to the ledger with some extra data to prove validity.</p>
+</dd>
+<dt><strong>Block</strong></dt>
+<dd><p>A list of ordered transactions with some extra data to prove validity.</p>
+</dd>
+<dt><strong>Blockchain</strong></dt>
+<dd><p>A monotonically increasing chain of blocks in which subsequent blocks are verified based on the data of the preceding blocks in the chain.</p>
+</dd>
+</dl>
+</div>
+<div id="addresses" class="slide section level1">
+<h1>Addresses</h1>
+<p>Maps a hash of a binary encoded ECDSA Public Key to a unique, irreversible identity that uniquely defines a participant in the network.</p>
+<ul>
+<li>64 bytes (32 bytes each for <code>x</code> and <code>y</code> values of the Public Key)</li>
+<li>Base 58 Encoded (shorter string than base16)</li>
+<li>Used to identify other Nanocoin users in the network</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Key.hs -}</span>
+
+<span class="ot">extractPoint ::</span> <span class="dt">ECDSA.PublicKey</span> <span class="ot">-&gt;</span> (<span class="dt">Integer</span>, <span class="dt">Integer</span>)
+extractPoint pubkey <span class="fu">=</span> (x,y)
+  <span class="kw">where</span>
+    <span class="dt">ECC.Point</span> x y <span class="fu">=</span> ECDSA.public_q pubkey </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Address.hs -}</span>
+
+<span class="ot">deriveAddress ::</span> <span class="dt">Key.PublicKey</span> <span class="ot">-&gt;</span> <span class="dt">Address</span>
+deriveAddress pub <span class="fu">=</span> <span class="dt">Address</span> (b58 addr)
+  <span class="kw">where</span>
+    (x, y) <span class="fu">=</span> Key.extractPoint pub
+    addr   <span class="fu">=</span> BA.convert <span class="fu">$</span> deriveHash pstr
+    <span class="co">-- Convert x and y to bytes</span>
+    pstr   <span class="fu">=</span> i2osp x <span class="fu">&lt;&gt;</span> i2osp y </code></pre></div>
+</div>
+<div id="addresses-cont" class="slide section level1">
+<h1>Addresses (cont)</h1>
+<p>Hash of ECDSA Public Key bytes is adopted from the Bitcoin Protocol:</p>
+<p><span class="math display">\[
+  deriveHash(bytes) = sha256 (sha256 (ripemd160 (sha256 (bytes))))
+\]</span></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Hash.hs -}</span>
+
+<span class="ot">sha256Raw ::</span> <span class="dt">ByteString</span> <span class="ot">-&gt;</span> <span class="dt">Digest</span> <span class="dt">SHA3_256</span>
+sha256Raw x <span class="fu">=</span> hash<span class="ot"> x ::</span> <span class="dt">Digest</span> <span class="dt">SHA3_256</span>
+
+<span class="ot">sha256Raw&#39; ::</span> <span class="dt">ByteString</span> <span class="ot">-&gt;</span> <span class="dt">ByteString</span>
+sha256Raw&#39; <span class="fu">=</span> BA.convert <span class="fu">.</span> sha256Raw
+
+<span class="ot">ripemd160Raw ::</span> <span class="dt">ByteString</span> <span class="ot">-&gt;</span> <span class="dt">Digest</span> <span class="dt">RIPEMD160</span>
+ripemd160Raw x <span class="fu">=</span> hash<span class="ot"> x ::</span> <span class="dt">Digest</span> <span class="dt">RIPEMD160</span>
+
+<span class="ot">ripemd160Raw&#39; ::</span> <span class="dt">ByteString</span> <span class="ot">-&gt;</span> <span class="dt">ByteString</span>
+ripemd160Raw&#39; <span class="fu">=</span> BA.convert <span class="fu">.</span> ripemd160Raw</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Address.hs -}</span>
+
+<span class="ot">deriveHash ::</span> <span class="dt">ByteString</span> <span class="ot">-&gt;</span> <span class="dt">ByteString</span>
+deriveHash <span class="fu">=</span> Hash.sha256Raw&#39; <span class="fu">.</span> Hash.sha256Raw&#39; <span class="fu">.</span> Hash.ripemd160Raw&#39; <span class="fu">.</span> Hash.sha256Raw&#39;</code></pre></div>
+</div>
+<div id="transactions" class="slide section level1">
+<h1>Transactions</h1>
+<p>A <code>Transaction</code> represents an atomic, <code>Ledger</code> state modification.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Transaction.hs -}</span>
+
+<span class="kw">data</span> <span class="dt">Transaction</span> <span class="fu">=</span> <span class="dt">Transaction</span>
+  {<span class="ot"> header    ::</span> <span class="dt">TransactionHeader</span> <span class="co">-- ^ Denoting the type of transaction</span>
+  ,<span class="ot"> signature ::</span> <span class="dt">ByteString</span>        <span class="co">-- ^ The issuer&#39;s serialized ECC signature of the header</span>
+  } 
+
+<span class="kw">data</span> <span class="dt">TransactionHeader</span> <span class="fu">=</span> <span class="dt">Transfer</span>
+  {<span class="ot"> senderKey ::</span> <span class="dt">Key.PublicKey</span>     <span class="co">-- ^ Public Key of transaction issuer</span>
+  ,<span class="ot"> recipient ::</span> <span class="dt">Address</span>           <span class="co">-- ^ The address to transfer Nanocoin to</span>
+  ,<span class="ot"> amount    ::</span> <span class="dt">Int</span>               <span class="co">-- ^ The amount of Nanocoin to transfer</span>
+  } </code></pre></div>
+</div>
+<div id="transactions---serialization" class="slide section level1">
+<h1>Transactions - Serialization</h1>
+<p>In order for transactions to be signed by the issuer, they must first be converted to a string of bytes, since <code>cryptonite</code>'s <code>sign</code> and <code>verify</code> functions take the argument data as a <code>ByteString</code>.</p>
+<p>Nanocoin uses the <code>Data.Serialize</code> module from the <code>cereal</code> serialization library:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Transaction.hs -}</span>
+
+<span class="kw">import </span><span class="dt">Data.Serialize</span>
+
+<span class="fu">...</span>
+
+<span class="kw">instance</span> <span class="dt">Generic</span> <span class="dt">Transaction</span>
+<span class="kw">instance</span> <span class="dt">Serialize</span> <span class="dt">Transaction</span></code></pre></div>
+<p><em>Note</em>: This is also how transactions are encoded before being broadcast to the network.</p>
+</div>
+<div id="transactions---serialization-cont" class="slide section level1">
+<h1>Transactions - Serialization (cont)</h1>
+<p>But sometimes you have to write the serialization function manually...</p>
+<ul>
+<li>The <code>cryptonite</code> library doesn't define instance of <code>Generic</code> and/or <code>Serialize</code> for us.</li>
+<li>We use <code>PublicKey</code> for the <code>senderKey</code> field of <code>TransactionHeader</code></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Key.hs -}</span>
+
+<span class="ot">putPublicKey ::</span> <span class="dt">S.Putter</span> <span class="dt">ECDSA.PublicKey</span>
+putPublicKey pubKey <span class="fu">=</span> <span class="kw">do</span> 
+  <span class="kw">let</span> (x,y) <span class="fu">=</span> Key.extractPoint pubKey
+  putInteger x
+  putInteger y
+
+<span class="co">-- | UNSAFE: Does not check the validity of the point</span>
+<span class="ot">getPublicKey ::</span> <span class="dt">Get</span> <span class="dt">ECDSA.PublicKey</span>
+getPublicKey <span class="fu">=</span> <span class="kw">do</span>
+  x <span class="ot">&lt;-</span> getInteger
+  y <span class="ot">&lt;-</span> getInteger
+  pure <span class="fu">$</span> Key.mkPublicKey (x,y)
+
+<span class="co">-- ... this is annoying.</span></code></pre></div>
+<p>Serialization for <code>TransactionHeader</code> is written in the same way, using both <code>putPublicKey</code> and <code>getPublicKey</code> for it's <code>Serialize</code> instance.</p>
+</div>
+<div id="transactions---validation" class="slide section level1">
+<h1>Transactions - Validation</h1>
+<p>Transactions are valid given certain predicates:</p>
+<ol style="list-style-type: decimal">
+<li>Can the <code>signature</code> field be verified given the <code>senderKey</code> field?</li>
+<li>Does the transfer issuer have enough Nanocoin to transfer?</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Transaction.hs -}</span>
+
+<span class="kw">data</span> <span class="dt">InvalidTxField</span>
+  <span class="fu">=</span> <span class="dt">InvalidTxSignature</span> <span class="dt">Text</span>
+  <span class="fu">|</span> <span class="dt">InvalidTransfer</span> <span class="dt">Ledger.TransferError</span>
+
+<span class="kw">data</span> <span class="dt">InvalidTx</span> <span class="fu">=</span> <span class="dt">InvalidTx</span> <span class="dt">Transaction</span> <span class="dt">InvalidTxField</span></code></pre></div>
+<p><em>Note</em>: When validating a transfer transaction in a block, ledger state must be accumulated.</p>
+</div>
+<div id="transactions---signature-verification" class="slide section level1">
+<h1>Transactions - Signature Verification</h1>
+<p>To verify a transaction signature:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Transaction.hs -}</span>
+
+<span class="ot">verifyTxSignature ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Transaction</span> <span class="ot">-&gt;</span> <span class="dt">Either</span> <span class="dt">InvalidTx</span> ()
+verifyTxSignature l tx<span class="fu">@</span>(<span class="dt">Transaction</span> hdr sigBS)  <span class="fu">=</span> <span class="kw">do</span>
+
+  <span class="co">-- Try to decode the serialized signature</span>
+  <span class="kw">case</span> S.decode sigBS <span class="kw">of</span>
+    
+    <span class="dt">Left</span> err <span class="ot">-&gt;</span> <span class="dt">Left</span> <span class="fu">$</span> <span class="dt">InvalidTx</span> tx <span class="fu">$</span> <span class="dt">InvalidTxSignature</span> (toS err)
+    
+    <span class="dt">Right</span> sig <span class="ot">-&gt;</span> <span class="kw">do</span>
+      
+      <span class="co">-- Try to verify the signature w/ the issuer&#39;s public key </span>
+      <span class="kw">let</span> pubKey <span class="fu">=</span> senderKey hdr 
+      <span class="kw">let</span> validSig <span class="fu">=</span> Key.verify pubKey sig (S.encode txHdr)
+      
+      unless validSig <span class="fu">$</span> <span class="dt">Left</span> <span class="fu">$</span> <span class="dt">InvalidTx</span> tx <span class="fu">$</span>
+        <span class="dt">InvalidTxSignature</span> <span class="st">&quot;Failed to verify transaction signature&quot;</span></code></pre></div>
+</div>
+<div id="transactions---transfer-validation" class="slide section level1">
+<h1>Transactions - Transfer Validation</h1>
+<p>Validation of the transaction header happens by attempting to transfer Nanocoin from one <code>Address</code> to another.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Transaction.hs -}</span>
+
+<span class="ot">validateTransfer ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">TransactionHeader</span> <span class="ot">-&gt;</span> <span class="dt">Either</span> <span class="dt">InvalidTx</span> <span class="dt">Ledger</span>
+validateTransfer ledger (<span class="dt">Transfer</span> pubKey to amnt) <span class="fu">=</span> <span class="kw">do</span>
+  
+  <span class="co">-- Derive the address of the issuer&#39;s public key</span>
+  <span class="kw">let</span> from <span class="fu">=</span> deriveAddress pk
+  
+  <span class="co">-- Attempt to apply the transaction to the ledger </span>
+  <span class="kw">case</span> Ledger.transfer from to amnt ledger <span class="kw">of</span>
+    <span class="dt">Left</span> err <span class="ot">-&gt;</span> <span class="kw">do</span>
+      <span class="dt">Left</span> <span class="fu">$</span> <span class="dt">InvalidTx</span> tx <span class="fu">$</span> <span class="dt">InvalidTransfer</span> err
+      pure ledger
+    <span class="dt">Right</span> ledger&#39; <span class="ot">-&gt;</span> pure ledger&#39;</code></pre></div>
+<p>The real implementation uses <code>StateT</code> to accumulate transaction errors.</p>
+</div>
+<div id="blocks" class="slide section level1">
+<h1>Blocks</h1>
+<p>Blocks are simply ordered lists of transactions, plus a few other things to help us validate their integrity.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Block.hs -}</span>
+
+<span class="kw">data</span> <span class="dt">BlockHeader</span> <span class="fu">=</span> <span class="dt">BlockHeader</span>
+  {<span class="ot"> origin       ::</span> <span class="dt">Key.PublicKey</span> <span class="co">-- ^ Public key of Block miner</span>
+  ,<span class="ot"> previousHash ::</span> <span class="dt">ByteString</span>    <span class="co">-- ^ Previous block hash</span>
+  ,<span class="ot"> transactions ::</span> [<span class="dt">Transaction</span>] <span class="co">-- ^ List of Transactions</span>
+  ,<span class="ot"> nonce        ::</span> <span class="dt">Int64</span>         <span class="co">-- ^ Nonce for Proof-of-Work</span>
+  } 
+
+<span class="kw">data</span> <span class="dt">Block</span> <span class="fu">=</span> <span class="dt">Block</span>
+  {<span class="ot"> index        ::</span> <span class="dt">Index</span>         <span class="co">-- ^ Block height</span>
+  ,<span class="ot"> header       ::</span> <span class="dt">BlockHeader</span>   <span class="co">-- ^ Block header</span>
+  ,<span class="ot"> signature    ::</span> <span class="dt">ByteString</span>    <span class="co">-- ^ Block signature</span>
+  } </code></pre></div>
+</div>
+<div id="blocks---hashing" class="slide section level1">
+<h1>Blocks - Hashing</h1>
+<p>Block hashing is important because it is key in preserving immutability of the block chain.</p>
+<ul>
+<li>Each block header contains a hash of the previous block</li>
+<li>The hash must have a certain prefix because of PoW Consensus</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Block.hs -}</span>
+
+<span class="co">-- | Hash a block header, to be used as the prevHash field in Block</span>
+<span class="ot">hashBlockHeader ::</span> <span class="dt">BlockHeader</span> <span class="ot">-&gt;</span> <span class="dt">ByteString</span>
+hashBlockHeader (<span class="dt">BlockHeader</span> origin previousHash txs nonce) <span class="fu">=</span>
+  Hash.sha256Raw&#39; <span class="fu">$</span>
+    BS.concat [ rawAddress (deriveAddress origin)
+              , previousHash 
+              , S.encode txs 
+              , B8.pack (show nonce)
+              ]</code></pre></div>
+</div>
+<div id="blocks---blockchain" class="slide section level1">
+<h1>Blocks - Blockchain</h1>
+<p>A <strong>Blockchain</strong> is constructed by forcing every block to contain a hash of the previous block's header in its header.</p>
+<p><img src="img/bitcoin-block-chain-verified.png" alt="Drawing" class="center-img" style="width: 700px"></p>
+<p><em>Note</em>: In the classic <em>Proof of Work</em> consensus algorithm, the <code>nonce</code> field of the block header is incremented until the hash of the block header has a certain prefix.</p>
+</div>
+<div id="blocks---validation" class="slide section level1">
+<h1>Blocks - Validation</h1>
+<p>To validate a block, several values are needed:</p>
+<ul>
+<li>Current Ledger State</li>
+<li>Previous Block</li>
+<li>Current Block to Validate</li>
+</ul>
+<p>The validity of a block is determined by several predicates:</p>
+<ol style="list-style-type: decimal">
+<li><code>currentBlockIndex == previousBlockIndex + 1</code></li>
+<li><code>hashBlock previousBlock == previousHash currentBlock</code></li>
+<li><code>proofOfWorkPredicate (hashBlock currentBlock)</code></li>
+<li><code>length (transactions currentBlock) &gt; 0</code></li>
+<li><code>verify originKey signature (encode currentBlockHeader)</code></li>
+<li><code>validateTransactions (transactions block)</code></li>
+</ol>
+</div>
+<div id="blocks---validation-cont" class="slide section level1">
+<h1>Blocks - Validation (cont)</h1>
+<p>The validation predicates translate easily into a <code>validateBlock</code> function:</p>
+<h2 id="implementation">Implementation</h2>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Block.hs -}</span>
+
+<span class="co">-- | Validate a block before accepting a block as new block in chain</span>
+<span class="ot">validateBlock ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Block</span> <span class="ot">-&gt;</span> <span class="dt">Block</span> <span class="ot">-&gt;</span> <span class="dt">Either</span> <span class="dt">InvalidBlock</span> ()
+validateBlock ledger prevBlock block
+  <span class="fu">|</span> index block <span class="fu">/=</span> index prevBlock <span class="fu">+</span> <span class="dv">1</span> <span class="fu">=</span> <span class="dt">Left</span> <span class="fu">$</span> <span class="dt">InvalidBlockIndex</span> (index block)
+  <span class="fu">|</span> hashBlock prevBlock <span class="fu">/=</span> previousHash (header block) <span class="fu">=</span> <span class="dt">Left</span> <span class="dt">InvalidPrevBlockHash</span>
+  <span class="fu">|</span> not (checkProofOfWork block) <span class="fu">=</span> <span class="dt">Left</span> <span class="dt">InvalidBlockHash</span>
+  <span class="fu">|</span> null (transactions <span class="fu">$</span> header block) <span class="fu">=</span> <span class="dt">Left</span> <span class="dt">InvalidBlockNumTxs</span>
+  <span class="fu">|</span> otherwise <span class="fu">=</span> <span class="kw">do</span>
+      <span class="co">-- Verify signature of block</span>
+      verifyBlockSignature block
+      <span class="co">-- Validate all transactions w/ respect to world state</span>
+      first <span class="dt">InvalidBlockTx</span> <span class="fu">$</span> <span class="kw">do</span>
+        <span class="kw">let</span> txs <span class="fu">=</span> transactions <span class="fu">$</span> header block
+        T.validateTransactions ledger txs</code></pre></div>
+</div>
+<div id="ledger" class="slide section level1">
+<h1>Ledger</h1>
+<p>The <code>Ledger</code> is <em>the</em> datatype that the reflects the culmination of blocks.</p>
+<ul>
+<li>Blockchains are ordered lists of blocks</li>
+<li>Blocks encapsulate an ordered list of transactions</li>
+<li>Transactions are atomic stateful ledger updates</li>
+</ul>
+<p>Therefore, the <code>Ledger</code> is the state resulting from the ordered, sequential application of all transactions in all blocks. In Nanocoin, this manifests in a mapping of addresses (derived from ECC public keys) to the addresses balance.</p>
+</div>
+<div id="ledger-1" class="slide section level1">
+<h1>Ledger</h1>
+<p>Definition and operations on the <code>Ledger</code> datatype:</p>
+<p>```haskell {- src/Nanocoin/Ledger.hs -}</p>
+<p>type Balance = Int</p>
+<p>-- | Datatype storing the holdings of addresses newtype Ledger = Ledger { unLedger :: Map Address Balance }</p>
+<p>-- Lookup the balance of an Address. This operation returns -- Nothing if the address has never transacted on the network. lookupBalance :: Address -&gt; Ledger -&gt; Maybe Balance</p>
+<p>-- | Add an integer to an account's existing balance addBalance :: Address -&gt; Balance -&gt; Ledger -&gt; Ledger</p>
+<p>-- | Add an address with 1000 balance to the Ledger addAddress :: Address -&gt; Ledger -&gt; Ledger</p>
+<p>-- | Transfer Nanocoin from one account to another transfer :: Ledger -&gt; Address -&gt; Address -&gt; Balance -&gt; Either TransferError Ledger</p>
+</div>
+<div id="ledger---apply-transaction" class="slide section level1">
+<h1>Ledger - Apply Transaction</h1>
+<p>The application of a transaction to a ledger can be described by a function that takes a transaction and a ledger as arguments and returns the new modified ledger.</p>
+<p>Applying a sequence of transactions is sometimes used to validate transactions before attempting to mine a block.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Transaction.hs -}</span>
+
+<span class="kw">type</span> <span class="dt">ApplyM</span> <span class="fu">=</span> <span class="dt">State</span> [<span class="dt">InvalidTx</span>]
+
+<span class="ot">throwError ::</span> <span class="dt">InvalidTx</span> <span class="ot">-&gt;</span> <span class="dt">ApplyM</span> ()
+throwError itx <span class="fu">=</span> modify (<span class="fu">++</span> [itx])
+
+<span class="ot">runApplyM ::</span> <span class="dt">ApplyM</span> a <span class="ot">-&gt;</span> (a,[<span class="dt">InvalidTx</span>])
+runApplyM <span class="fu">=</span> flip runState []
+
+<span class="co">-- | Applies a list of transactions to the ledger</span>
+<span class="ot">applyTransactions ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> [<span class="dt">Transaction</span>] <span class="ot">-&gt;</span> (<span class="dt">Ledger</span>,[<span class="dt">InvalidTx</span>])
+applyTransactions ledger <span class="fu">=</span>
+  runApplyM <span class="fu">.</span> foldM applyTransaction ledger</code></pre></div>
+</div>
+<div id="ledger---apply-transaction-cont" class="slide section level1">
+<h1>Ledger - Apply Transaction (cont)</h1>
+<p>Since there is only one transaction <code>Transfer</code>, applying a transaction is as simple as throwing an error if the transfer is invalid, or returning the resulting ledger on success:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Transaction.hs -}</span>
+
+<span class="ot">applyTransaction ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Transaction</span> <span class="ot">-&gt;</span> <span class="dt">ApplyM</span> <span class="dt">Ledger</span>
+applyTransaction ledger tx<span class="fu">@</span>(<span class="dt">Transaction</span> hdr sig) <span class="fu">=</span> <span class="kw">do</span>
+
+  <span class="kw">let</span> (<span class="dt">Transfer</span> pk to amnt) <span class="fu">=</span> hdr
+
+  <span class="co">-- Verify Transaction Signature</span>
+  <span class="kw">case</span> verifyTxSignature ledger tx <span class="kw">of</span>
+    <span class="dt">Left</span> err <span class="ot">-&gt;</span> throwError err
+    <span class="dt">Right</span> _  <span class="ot">-&gt;</span> pure ()
+
+  <span class="co">-- Apply transaction to world state</span>
+  <span class="kw">let</span> from <span class="fu">=</span> deriveAddress pk
+  <span class="kw">case</span> Ledger.transfer from to amnt ledger <span class="kw">of</span>
+    <span class="dt">Left</span> err <span class="ot">-&gt;</span> <span class="kw">do</span>
+      throwError <span class="fu">$</span> <span class="dt">InvalidTx</span> tx <span class="fu">$</span> <span class="dt">InvalidTransfer</span> err
+      pure ledger
+    <span class="dt">Right</span> ledger&#39; <span class="ot">-&gt;</span> pure ledger&#39;</code></pre></div>
+<p>```</p>
+</div>
+<div id="ledger---apply-block" class="slide section level1">
+<h1>Ledger - Apply Block</h1>
+<p>To <strong>apply</strong> a block to the ledger means to apply every transaction in the block to the ledger state in order, cumulating a world state.</p>
+<p>After validating a new block received from the network, a node must then <strong>apply</strong> the block to it's ledger state.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Block.hs -}</span>
+
+<span class="co">-- | Apply block transactions to world state</span>
+<span class="ot">applyBlock ::</span> <span class="dt">Ledger</span> <span class="ot">-&gt;</span> <span class="dt">Block</span> <span class="ot">-&gt;</span> (<span class="dt">Ledger</span>, [<span class="dt">InvalidTx</span>])
+applyBlock ledger <span class="fu">=</span> applyTransactions ledger <span class="fu">.</span> transactions <span class="fu">.</span> header</code></pre></div>
+<p>In Nanocoin's implementation, <code>applyBlock</code> is also used in the definitions for <code>validateBlock</code>. A block is only valid if all it's transactions are valid.</p>
+<h2 id="networking">Networking</h2>
+</div>
+<div id="node" class="slide section level1">
+<h1>Node</h1>
+<p>A node in the Nanocoin network is simply a running instance of the Nanocoin program.</p>
+<p>Nodes communicate via the local <code>Multicast</code> network. With multicast, all nodes broadcast to all other nodes simultaneously.</p>
+<pre><code>      Node    Node     Node
+        ^       ^       ^
+         \      |      /
+          \     |     /
+           v    v    v
+Node &lt;---&gt; (multicast) &lt;---&gt; Node
+           ^    ^    ^
+          /     |     \
+         /      |      \
+        v       v       v
+      Node     Node    Node</code></pre>
+</div>
+<div id="node---nodestate" class="slide section level1">
+<h1>Node - NodeState</h1>
+<p>A node carries around some stateful values so that over the lifetime of the running node, it's interal state can change; In Nanocoin, this is the <code>NodeState</code> datatype.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Network/Node.hs -}</span>
+
+<span class="kw">data</span> <span class="dt">NodeState</span> <span class="fu">=</span> <span class="dt">NodeState</span>
+  {<span class="ot"> nodeConfig   ::</span> <span class="dt">Peer</span>                   <span class="co">-- ^ P2P info (rpc port, p2p port)</span>
+  ,<span class="ot"> nodeKeys     ::</span> <span class="dt">KeyPair</span>                <span class="co">-- ^ Node ECC key pair</span>
+  ,<span class="ot"> nodeSender   ::</span> <span class="dt">MsgSender</span>              <span class="co">-- ^ Function to broadcast a P2P message</span>
+  ,<span class="ot"> nodeReceiver ::</span> <span class="dt">MsgReceiver</span>            <span class="co">-- ^ The source of network messages</span>
+  
+  ,<span class="ot"> nodeChain    ::</span> <span class="dt">MVar</span> <span class="dt">Block.Blockchain</span>  <span class="co">-- ^ In-memory Blockchain</span>
+  ,<span class="ot"> nodeLedger   ::</span> <span class="dt">MVar</span> <span class="dt">Ledger.Ledger</span>     <span class="co">-- ^ In-memory ledger state</span>
+  ,<span class="ot"> nodeMemPool  ::</span> <span class="dt">MVar</span> <span class="dt">MemPool.MemPool</span>   <span class="co">-- ^ Mempool to collect transactions</span>
+  } </code></pre></div>
+<p><em>Note</em>: In Haskell, if you know that there is some chance that multiple processes or threads may need to alter the same statful variable <code>MVar</code>s come in handy.</p>
+</div>
+<div id="node---ledger-blockchain" class="slide section level1">
+<h1>Node - Ledger &amp; Blockchain</h1>
+<p>As mentioned before, the <code>Ledger</code> is the stateful representation of the current block chain.</p>
+<p>When a node receives a valid block, it updates the <code>nodeLedger</code> field of <code>NodeState</code> by applying the block's transactions to the <code>MVar</code>.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Network/Node.hs -}</span>
+
+<span class="ot">applyBlock ::</span> <span class="dt">NodeState</span> <span class="ot">-&gt;</span> <span class="dt">Block</span> <span class="ot">-&gt;</span> <span class="dt">Block</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+applyBlock nodeState prevBlock  block <span class="fu">=</span> <span class="kw">do</span>
+  ledger <span class="ot">&lt;-</span> getLedger nodeState
+  <span class="kw">case</span> Block.validateAndApplyBlock ledger prevBlock block <span class="kw">of</span>
+    <span class="dt">Left</span> err <span class="ot">-&gt;</span> putText <span class="fu">$</span> show err
+    <span class="dt">Right</span> (ledger&#39;, itxs)
+      <span class="fu">|</span> null itxs <span class="ot">-&gt;</span> <span class="kw">do</span>
+         
+          <span class="co">-- If no invalid transactions, add block to chain</span>
+          modifyBlockChain_ nodeState (block<span class="fu">:</span>)
+          
+          <span class="co">-- Remove transactions from memPool</span>
+          <span class="kw">let</span> blockTxs <span class="fu">=</span> Block.transactions <span class="fu">$</span> Block.header block
+          modifyMemPool_ nodeState <span class="fu">$</span> MemPool.removeTransactions blockTxs
+          
+          <span class="co">-- Update ledger to new ledger state</span>
+          setLedger nodeState ledger&#39;
+      
+      <span class="fu">|</span> otherwise <span class="ot">-&gt;</span> putText <span class="st">&quot;Received invalid block.&quot;</span></code></pre></div>
+</div>
+<div id="node---mempool" class="slide section level1">
+<h1>Node - MemPool</h1>
+<ul>
+<li>The stateful variable that is updated when a node receives a <code>TransactionMsg</code>.</li>
+<li>A list of transactions that will be used when mining a block.</li>
+</ul>
+<p>When a node issues a transaction, it broadcasts it to all peers in the network, and all peers add the transaction to their <code>MemPool</code>s.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/MemPool.hs -}</span>
+
+<span class="kw">newtype</span> <span class="dt">MemPool</span> <span class="fu">=</span> <span class="dt">MemPool</span>
+  {<span class="ot"> unMemPool ::</span> [<span class="dt">Transaction</span>]
+  } <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>, <span class="dt">Generic</span>, <span class="dt">Monoid</span>, <span class="dt">ToJSON</span>)
+
+<span class="ot">addTransaction ::</span> <span class="dt">Transaction</span> <span class="ot">-&gt;</span> <span class="dt">MemPool</span> <span class="ot">-&gt;</span> <span class="dt">MemPool</span>
+addTransaction tx (<span class="dt">MemPool</span> pool) <span class="fu">=</span> <span class="dt">MemPool</span> (pool <span class="fu">++</span> [tx])
+
+<span class="ot">removeTransactions ::</span> [<span class="dt">Transaction</span>] <span class="ot">-&gt;</span> <span class="dt">MemPool</span> <span class="ot">-&gt;</span> <span class="dt">MemPool</span>
+removeTransactions txs (<span class="dt">MemPool</span> pool) <span class="fu">=</span> <span class="dt">MemPool</span> <span class="fu">$</span> pool \\ txs</code></pre></div>
+</div>
+<div id="p2p-messaging" class="slide section level1">
+<h1>P2P Messaging</h1>
+<p>In order for nodes to talk to each other, they need a <strong>protocol</strong> on which they all agree.</p>
+<p>The <em>messaging</em> protocol defines what messages nodes will send to each other, and how node's should respond to those messages.</p>
+<p>The key to good distributed network protocols is <em>simplicity</em>.</p>
+</div>
+<div id="p2p-messaging---protocol" class="slide section level1">
+<h1>P2P Messaging - Protocol</h1>
+<p>The messaging protocol used in Nanocoin is simple.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Network/Message -}</span>
+
+<span class="kw">data</span> <span class="dt">Msg</span> 
+  <span class="fu">=</span> <span class="dt">QueryBlockMsg</span> <span class="dt">Int</span>          
+  <span class="fu">|</span> <span class="dt">BlockMsg</span> <span class="dt">Block</span>
+  <span class="fu">|</span> <span class="dt">TransactionMsg</span> <span class="dt">Transaction</span>
+
+<span class="co">-- | Type synonyms for Multicast send/receive functions</span>
+<span class="kw">type</span> <span class="dt">MsgSender</span> <span class="fu">=</span> <span class="dt">M.Sender</span> <span class="dt">Msg</span>
+<span class="kw">type</span> <span class="dt">MsgReceiver</span> <span class="fu">=</span> <span class="dt">M.Receiver</span> <span class="dt">Msg</span></code></pre></div>
+<p>A consequence of this simplicity and the use of multicast is that the network is often flooded with messages.</p>
+</div>
+<div id="p2p-messaging---protocol-cont" class="slide section level1">
+<h1>P2P Messaging - Protocol (cont)</h1>
+<p>On <code>QueryBlockMsg n</code>: 1) Query the current block chain state 2) If the block with index <code>n</code> exists, i. then respond with a <code>BlockMsg blockAtIndexN</code> ii. else dont respond</p>
+<p>On <code>BlockMsg block</code>: 1) Query the latest block in the chain 2) Attempt to apply the new <code>block</code> to the ledger state 3) If applying the block succeeded i. then respond with a <code>QueryBlockMsg (index block + 1)</code> ii. else do nothing</p>
+<p>On <code>TransactionMsg tx</code>: 1) Query the current ledger state 2) If the transaction is valid i. then add it to the mempool ii. else do nothing</p>
+</div>
+<div id="consensus" class="slide section level1">
+<h1>Consensus</h1>
+<p><strong>Consensus</strong> is how nodes in the network agree on what blocks are valid or not.</p>
+<p>Sometimes these consensus algorithms can be quite complex and warrant the implementation of an entire protocol to ensure consensus is reached.</p>
+<p>In Nanocoin, classic <strong>Proof of Work</strong> consensus is used, and acheived by adding a final predicate to block validation.</p>
+</div>
+<div id="consensus---proof-of-work" class="slide section level1">
+<h1>Consensus - Proof of Work</h1>
+<p>In classic PoW, there is a notion of <strong>difficulty</strong> when it comes to mining a block, determining how &quot;hard&quot; the node will have to work to mine the block.</p>
+<p>For Nanocoin, the difficulty is decided by the block index:</p>
+<p><span class="math display">\[ difficulty(index) = round(ln(index)) \]</span>.</p>
+<p>The difficulty calculated determines how many zeros must prefix the resulting sha256 hash of the contents of the block header.</p>
+<h2 id="algorithm">Algorithm:</h2>
+<ol style="list-style-type: decimal">
+<li>Assemble a block header with all relevant data and the <code>nonce</code> field equal to 0</li>
+<li>Hash the block header</li>
+<li>If the resulting hash has a prefix of <span class="math inline">\(difficulty(index)\)</span> zeros</li>
+</ol>
+<ol style="list-style-type: lower-roman">
+<li>then return the block header</li>
+<li>else increment the nonce value in the block header and go to step 2.</li>
+</ol>
+</div>
+<div id="consensus---proof-of-work-implementation" class="slide section level1">
+<h1>Consensus - Proof of Work (Implementation)</h1>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Block.hs -}</span>
+
+proofOfWork
+<span class="ot">  ::</span> <span class="dt">Int</span>         <span class="co">-- ^ Difficulty measured by block index</span>
+  <span class="ot">-&gt;</span> <span class="dt">BlockHeader</span> <span class="co">-- ^ Header to hash with nonce parameter</span>
+  <span class="ot">-&gt;</span> <span class="dt">BlockHeader</span>
+proofOfWork idx blockHeader <span class="fu">=</span> blockHeader { nonce <span class="fu">=</span> calcNonce <span class="dv">0</span> }
+  <span class="kw">where</span>
+    difficulty <span class="fu">=</span> calcDifficulty idx
+    prefix <span class="fu">=</span> toS <span class="fu">$</span> replicate difficulty <span class="ch">&#39;0&#39;</span>
+
+    calcNonce n
+      <span class="fu">|</span> prefix&#39; <span class="fu">==</span> prefix <span class="fu">=</span> n
+      <span class="fu">|</span> otherwise <span class="fu">=</span> calcNonce <span class="fu">$</span> n <span class="fu">+</span> <span class="dv">1</span>
+      <span class="kw">where</span>
+        headerHash <span class="fu">=</span> hashBlockHeader (blockHeader { nonce <span class="fu">=</span> n })
+        prefix&#39; <span class="fu">=</span> BS.take difficulty headerHash
+        
+<span class="ot">calcDifficulty ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+calcDifficulty <span class="fu">=</span> round <span class="fu">.</span> logBase (<span class="dv">2</span><span class="ot"> ::</span> <span class="dt">Float</span>) <span class="fu">.</span> fromIntegral</code></pre></div>
+</div>
+<div id="consensus---validation" class="slide section level1">
+<h1>Consensus - Validation</h1>
+<p>One of the most notable results of the Proof of Work is that it is <strong>hard</strong> to generate a block, but <em>easy</em> to verify the work.</p>
+<p><strong>Hard:</strong></p>
+<blockquote>
+<p>&quot;For this PoW implementation the average nonce computed is <code>16^n</code>, so when the length of the chain surpasses 12 (<code>round(ln(n)) == 4</code>) it begins to take several seconds to mine each block. As <code>n</code> surpasses 23, mining a block could take well over 10 minutes.&quot;</p>
+</blockquote>
+<p><em>Easy</em>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">{- src/Nanocoin/Block.hs -}</span>
+
+<span class="ot">checkProofOfWork ::</span> <span class="dt">Block</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+checkProofOfWork block <span class="fu">=</span>
+    BS.isPrefixOf prefix <span class="fu">$</span> hashBlock block
+  <span class="kw">where</span>
+    difficulty <span class="fu">=</span> calcDifficulty <span class="fu">$</span> index block
+    prefix <span class="fu">=</span> toS <span class="fu">$</span> replicate difficulty <span class="ch">&#39;0&#39;</span></code></pre></div>
+<h2 id="joining-the-network">Joining the Network</h2>
+</div>
+<div id="running-a-node" class="slide section level1">
+<h1>Running a Node</h1>
+<p>Install the <a href="https://docs.haskellstack.org/en/stable/README/">Stack</a> build system:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">stack</span> setup
+$ <span class="ex">stack</span> install nanocoin
+$ <span class="ex">nanocoin</span></code></pre></div>
+<p>Running <code>nanocoin</code> will spin up a Node with an RPC server running on <code>localhost:3000</code> and a P2P server communicating with basic UDP Multicast on port <code>8001</code>.</p>
+<p>You can specify which port th run the RPC server on, and from which directory to load a node's public/private ECC key pair. If you do not supply a <code>KEYS_DIR</code>, the node will generate a random key pair with which to issue transactions and mine block.</p>
+<p><code>Usage: nanocoin [-p|--rpc-port RPC_PORT] [-k|--keys KEYS_DIR]</code></p>
+</div>
+<div id="rpc-interface" class="slide section level1">
+<h1>RPC Interface</h1>
+<p>Nanocoin's RPC interface is implemented via an HTTP web server that serves as both a command and query entry points.</p>
+<p>Simply visit <code>localhost:XXXX/&lt;cmd-or-query&gt;</code> in your browser to interact with the node:</p>
+<p><strong>Queries</strong> - ask the node about it's state</p>
+<p><strong>Commands</strong> - tell the node to do something</p>
+<p><em>Note</em>: The implementation resides in <code>src/Nanocoin/Network/RPC.hs</code></p>
+</div>
+<div id="rpc-interface---query" class="slide section level1">
+<h1>RPC Interface - Query</h1>
+<dl>
+<dt><code>/address</code></dt>
+<dd><p>View the address of the current node (derived from the nodes public key)</p>
+</dd>
+<dt><code>/blocks</code></dt>
+<dd><p>View the blocks on the block chain, including their transactions.</p>
+</dd>
+<dt><code>/mempool</code></dt>
+<dd><p>View the current collected transactions that have not yet been included in a block on the network.</p>
+</dd>
+<dt><code>/ledger</code></dt>
+<dd><p>View the current state of the ledger, representative of all the transactions of all the blocks applied in order to result in a cumulative ledger state.</p>
+</dd>
+</dl>
+</div>
+<div id="rpc-interface---command" class="slide section level1">
+<h1>RPC Interface - Command</h1>
+<dl>
+<dt><code>/mineBlock</code></dt>
+<dd><p>Attempt to mine a block containing the transactions currently in the node's mempool. This will fail if there are no transactions in the mempool.</p>
+</dd>
+<dt><code>/transfer/:toAddress/:amount</code></dt>
+<dd><p>Issues a <code>Transfer</code> transaction to the network, transferring the specified <code>amount</code> of Nanocoin from this node's account to another node's account designated by <code>toAddress</code>. If you try to transfer more Nanocoin than you have, the transaction will be rejected during the block mining process and purged from all nodes' mempools.</p>
+</dd>
+</dl>
+<h2 id="conclusion">Conclusion</h2>
+</div>
+<div id="key-points" class="slide section level1">
+<h1>Key Points</h1>
+<div class="incremental">
+<ul>
+<li>Cryptography is cool!</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Haskell is great!</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li>Cryptocurrencies are complex pieces of software made of simple components.</li>
+</ul>
+</div>
+<div class="incremental">
+<ul>
+<li></li>
+</ul>
+</div>
+</div>
+<div id="future-work" class="slide section level1">
+<h1>Future Work</h1>
+<ul>
+<li><p>Merkle Trees</p></li>
+<li><p>CLI</p></li>
+<li><p>Testing</p></li>
+<li><p>Database</p></li>
+<li>Multicast to <code>cloud-haskell</code></li>
+<li>Giant refactor</li>
+<li><p>New Messaging Protocol</p></li>
+</ul>
+<h2 id="the-end">The End</h2>
+</div>
+</body>
+</html>
